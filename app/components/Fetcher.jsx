@@ -6,7 +6,7 @@ module.exports = function(url){
        resolve(data);
      }
 
-     var reqError = function(err) {
+     let reqError = function(err) {
        reject('Fetch Error :-S', err);
      }
 

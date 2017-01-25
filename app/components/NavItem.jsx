@@ -2,10 +2,9 @@ import React from 'react';
 
 
 export default React.createClass({
-    fn_navigate: function(e){
+    navigate: function(e){
       e.preventDefault();
-      console.log(e.currentTarget, e, this.props);
-      //this.props.selectChannelFn(163);
+      this.props.updateState(this.props.channel);
     },
     styles: function(color){
       return {
@@ -14,9 +13,10 @@ export default React.createClass({
     },
     defaultProps: {color:'red'},
     render: function(){
+       let c = this.props.channel;
        return (
          <div style={this.styles(this.props.color)} className="navitem">
-           <a onClick={this.fn_navigate} data-channelid="{this.props.id}"><img src={this.props.image} width="100%" /></a>
+           <a onClick={this.navigate}><img src={c.image} width="100%" /></a>
          </div>
        )
     }

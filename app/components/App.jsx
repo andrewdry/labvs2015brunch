@@ -2,83 +2,154 @@ import React from 'react';
 import Fetcher from './Fetcher';
 import Channel from './Channel';
 import Nav from './Nav';
+import Player from './Player';
+import Programs from './Programs';
 
 
 export default React.createClass({
    getInitialState: function(){
        return {
-         data: {
-
-         },
-         player: {
-
-         },
-         ui: {
-           selectedchannelid: null,
-           channeldisplay: "programs",
-           activeprogramend: null,
-
-         }
+       channels: [],
+       programs: [],
+       schedule:[],
+       player: {
+           cmd: "pause", // "play", "pause"
+           program: {},
+           src: "http://sverigesradio.se/topsy/direkt/132.mp3"
+       },
+       ui: {
+         selectedchannelid: null,
+         selectedchannelimage: null,
+         display: "guide"
+       }
       }
    },
-   // Local Variables for the UI
-   _var: {
-     data: {
 
-     },
+   _cache: {
+     channels: [],
+     programs: [],
+     schedule:[],
      player: {
-
+       cmd: "pause", // "play", "pause"
+       program: {},
+       src: "http://sverigesradio.se/topsy/direkt/132.mp3"
      },
      ui: {
        selectedchannelid: null,
-       channeldisplay: "programs",
-       activeprogramend: null,
-
+       selectedchannelimage: null,
+       display: "guide"
      }
-   },
+  },
 
    // API functions
-   getChannels: function(){
+   get: function(url, prop){
+      return new Promise( (resolve, reject) => {
+      var fetcher = Fetcher(url)
+        .then(function(val){
+            let r = val[prop];
+            resolve(r);
+        })
+        .catch(function(err){
+           reject(err);
+        });
+      });
 
-     return new Promise(function(resolve, reject){
-       var url = "http://api.sr.se/api/v2/channels?pagination=false&format=json&indent=true&filter=channel.channeltype&filtervalue=Rikskanal";
-       var fetcher = Fetcher(url)
-         .then(function(val){
-             var channels = [];
-             val.channels.forEach(function(c){
-                channels.push({["channel."+c.id+""]: c});
-             });
-             resolve(val.channels);
-            })
-          .catch(function(err){
-             reject(err);
-          });
-       });
+   },
+   getChannels: function(){
+     let usefilter = true;
+     var filter = usefilter ? "&filter=channel.channeltype&filtervalue=Rikskanal" : "";
+     var url = "http://api.sr.se/api/v2/channels?pagination=false&format=json" + filter;
+     var _self = this;
+     this.get(url,"channels")
+     .then(function(val){
+         _self.updateState({channels:val});
+     });
+   },
+
+   getProgramsForChannel: function(channel) {
+     // ToDo internal cache check
+    if(this._cache.ui.selectedchannelid === channel.id) { return; }
+     var _self = this;
+     let urls = [
+        {u: "http://api.sr.se/api/v2/programs/index?channelid="+channel.id+"&format=json&pagination=false", v: "programs"},
+        {u: channel.scheduleurl + "&format=json&pagination=false", v: "schedule"}
+        ];
+     for(var i=0;i<urls.length;i++){
+        let act = urls[i]
+        this.get(act.u, act.v)
+        .then(function(val){
+            let obj = {}
+            obj[act.v] = val;
+            let ui = _self._cache.ui;
+            ui.selectedchannelid = channel.id;
+            ui.selectedchannelimage = channel.image;
+            ui.display = "guide"; // always reset
+            _self.updateState(Object.assign({}, obj, {ui:ui}));
+        });
+     }
    },
 
    // State updater
    updateState: function(obj){
-     this._var = obj;
+     this._cache = Object.assign(this._cache, obj);
      this.setState(obj);
+     // console.log(this._cache);
    },
+   // Update player
+   updatePlayer: function(obj){
+     let player = this._cache.player;
+     let c = this._cache;
+      // Deal with pausing
+      if(obj.cmd == "pause"){
+        player.cmd = "pause";
+        this.updateState({player: player});
+        return;
+      }
 
+      // find channel live src from cache
+      let url = c.channels.filter(function(channel){
+          return c.ui.selectedchannelid == channel.id
+      })[0].liveaudio.url;
+
+      let update = false;
+      // play or pause
+      if (obj.cmd != player.cmd) {
+          player.cmd = obj.cmd;
+          update = true;
+      }
+      if (url != player.src){
+          player.src = url;
+          update = true;
+      }
+
+      if(update){
+
+          player.program = obj.player;
+          console.log(player, '<<<<<<<<<')
+          this.updateState({player: player});
+      }
+   },
    componentWillMount: function(){
-      var _self = this;
-      this.getChannels()
-        .then(function(val){
-           _self.updateState({data: {channels:val}})
-         })
-        .catch(function(err){console.log(err)});
+      this.getChannels();
    },
 
    render: function() {
-   var nav = this._var.data.channels;
+    let s = this._cache;
+    let navcontent = s.channels.length > 0 ?
+       <Nav channels={s.channels} updateState={this.getProgramsForChannel} /> : ''
+    let bodycontent = s.programs.length > 0 && s.ui.selectedchannelid?
+       <Programs programs={s.programs} schedule={s.schedule} ui={s.ui} update={this.updateState} updateplayer={this.updatePlayer}/> : ""
+
     return (
       <div id="content">
         <h4><i>Schwedische</i></h4>
-        <h1>Rundfunk</h1>
+        <h1>Rundfunk.</h1>
+        <nav>{navcontent}</nav>
+        <div className="audio-player">
+           <Player player={s.player} ui={s.ui} updateplayer={this.updatePlayer}/>
+        </div>
+        <section className="content-body">{bodycontent}</section>
 
-        <Nav channels={this._var.data.channels} />
       </div>
     );
   }

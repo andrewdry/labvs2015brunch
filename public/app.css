@@ -1,0 +1,75 @@
+* {
+  box-sizing: border-box;
+  font-family: -apple-system, system, sans-serif;
+}
+
+#content {
+  max-width: 800px;
+  margin: 0 auto;
+  font-family: Arial,Verdana;
+}
+h4 {margin-bottom: 0em;}
+h1 {
+  margin: 0em;
+  font-size: 100px;
+  text-transform: uppercase;
+}
+h1.i {
+  display: inline-block;
+  font-size: 12px;
+}
+
+a {
+  color: #3f894a;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #27552e;
+}
+nav div.navitem {width:25%; float:left; padding:5px;}
+
+
+div.toggler {margin:10px 5px 20px 5px; height:50px; }
+div.toggler img {width:50px; float:left;margin-right:10px;}
+div.toggler a {color:#bbb;
+  display:block;
+  background: #ddd;
+  float:left;
+  padding: 5px;
+  margin-right:10px;
+  width:50px;
+  height:50px;
+  font-size: 2em;
+  font-weight:bold;
+  text-transform: uppercase;
+  text-align: center;
+}
+.clear {clear:both;}
+#player {display:none;}
+figure {padding:0px; margin:0px;float:left; margin-right: 10px;}
+.audio-player {clear:both;margin:0 5px;}
+div.player-content {background: #000; color:#fff;height:50px;padding:5px;font-size: 2em;}
+.player-pause{color:red;float:right;width: 10px; height:30px; background: #fff;margin:10px 10px 10px 0;}
+img.player-image {width:50px;}
+
+div.toggler a.active {background: #bbb; color:#fff;}
+ul {list-style-type:none;padding-left: 5px;}
+ul.guide li {clear:both;border-bottom: 1px dotted #000;margin-bottom:1em;}
+ul.guide li div.time {float:left;font-size:1.5em;}
+div.schedule {}
+div.schedule span.title,  div.schedule span.time{font-size:1.5em;}
+div.schedule span.title {font-weight:bold;}
+a.btn {display:block; background-color: #000; color:#fff; padding: 10px; text-transform: uppercase; margin:5px;width:50%; text-align: center;}
+span.playing {color: red; text-transform: uppercase;}
+.hide {display:none;}
+div.program-group {padding-top:5px;}
+div.program {clear: both; margin-bottom:1em; margin-left:0;padding-bottom: 1em;}
+div.program-bundle {clear:both;padding:5px;}
+div.program-bundle .program-key {float:left; font-size:2em;}
+div.program div.content-item {padding-left:10%;}
+div.program div.content-item span.title {font-weight: bold; font-size: 1.5em;}
+div img.small {width: 20%; float:left;margin: 0 10px 10px 0;};
+
+
+/*# sourceMappingURL=app.css.map*/

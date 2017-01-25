@@ -7,14 +7,15 @@ export default React.createClass({
      return {}
     },
 
-    navItems: function() { return (this.props.channels || []).map(function(c, n){
-      console.log(c, n, '<<<<<<<<')
-      return <NavItem key={n} image={c.image} name={c.name} id={c.id} color={c.color} />;
+    navItems: function() {
+    let fn = this.props.updateState;
+    return (this.props.channels || []).map(function(c, n){
+      return <NavItem key={n}  channel={c} updateState={fn}/>;
     })},
 
     render: function(){
        return (
-       <nav>{this.navItems()}</nav>
+       <div>{this.navItems()}</div>
        );
     }
 });
