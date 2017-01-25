@@ -6,7 +6,6 @@ export default React.createClass({
    return {}
  },
  play: function(obj){
-
      this.props.updateplayer({player: obj, cmd: "play"});
  },
  guide: function(){
@@ -24,7 +23,7 @@ export default React.createClass({
       let now = new Date();
       let show = (start.getTime() >= now.getTime() || now.getTime() < end.getTime()) ? "" : "hide";
       let isplaying = (start.getTime() <= now.getTime() && end.getTime() > now.getTime())
-      let playbtn = isplaying ? <a href="#" className="btn" onClick={() => _self.play(s)}> Spela upp </a> : "";
+      let playbtn = isplaying ? <a href="#" className="btn" onClick={function(){ _self.play(s)}}> Spela upp </a> : "";
       let playing = isplaying ? <span className="playing">*** I sändning *** </span> : "";
       let playimage = isplaying ? <img src={s.imageurl} className="playimage"/> : "";
       // get more data through s.episodeid and api call

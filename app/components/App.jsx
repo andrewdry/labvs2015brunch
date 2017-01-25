@@ -43,7 +43,7 @@ export default React.createClass({
 
    // API functions
    get: function(url, prop){
-      return new Promise( (resolve, reject) => {
+      return new Promise( function (resolve, reject) {
       var fetcher = Fetcher(url)
         .then(function(val){
             let r = val[prop];
@@ -84,14 +84,26 @@ export default React.createClass({
             ui.selectedchannelid = channel.id;
             ui.selectedchannelimage = channel.image;
             ui.display = "guide"; // always reset
-            _self.updateState(Object.assign({}, obj, {ui:ui}));
+            _self.updateState(_self.mergeObjects({}, obj, {ui:ui}));
         });
      }
    },
-
+    // ie Object.assign function
+   mergeObjects:  function() {
+       var resObj = {};
+       for(var i=0; i < arguments.length; i += 1) {
+           var obj = arguments[i],
+               keys = Object.keys(obj);
+           for(var j=0; j < keys.length; j += 1) {
+               resObj[keys[j]] = obj[keys[j]];
+           }
+       }
+       return resObj;
+   },
    // State updater
    updateState: function(obj){
-     this._cache = Object.assign(this._cache, obj);
+     
+     this._cache = this.mergeObjects(this._cache, obj);
      this.setState(obj);
      // console.log(this._cache);
    },
@@ -123,9 +135,8 @@ export default React.createClass({
       }
 
       if(update){
-
           player.program = obj.player;
-          console.log(player, '<<<<<<<<<')
+          //console.log(player, '<<<<<<<<<')
           this.updateState({player: player});
       }
    },

@@ -2,6 +2,6 @@ import ReactDOM from 'react-dom';
 import React from 'react';
 import App from 'components/App';
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
   ReactDOM.render(<App />, document.querySelector('#app'));
 });

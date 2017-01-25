@@ -10,7 +10,9 @@ export default React.createClass({
      let a = this.props.player;
      let b = prevProps.player;
      let ui = this.props.ui;
+
      let player = document.getElementById("player");
+     console.log('in player', player.src, player.paused, a)
      if(!a.cmd) {
         return false;
      }
@@ -54,15 +56,15 @@ export default React.createClass({
 
   },
   componentWillUnmount: function() {
-      this._player.stop();
+      this._player.pause();
   },
   interact: function (e) {
-    this.props.updateplayer({cmd:"pause"});
+      this.props.updateplayer({cmd:"pause"});
   },
   render: function() {
     let p = this.props.player;
     let src = p.src;
-
+    console.log(p);
     return (
     <div className="player-container">
     <a className="player-pause" onClick={this.interact}>&nbsp;</a>{" "}
@@ -79,7 +81,6 @@ export default React.createClass({
         controls="controls"
         className="player"
         id="player"
-        ref={ (el) => this._player = el }
         preload="false"
       />
       </div>

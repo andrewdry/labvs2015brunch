@@ -1,13 +1,13 @@
 (function() {
   'use strict';
 
-  var globals = typeof window === 'undefined' ? global : window;
+  var globals = typeof global === 'undefined' ? self : global;
   if (typeof globals.require === 'function') return;
 
   var modules = {};
   var cache = {};
   var aliases = {};
-  var has = ({}).hasOwnProperty;
+  var has = {}.hasOwnProperty;
 
   var expRe = /^\.\.?(\/|$)/;
   var expand = function(root, name) {
@@ -36,8 +36,7 @@
   };
 
   var initModule = function(name, definition) {
-    var hot = null;
-    hot = hmr && hmr.createHot(name);
+    var hot = hmr && hmr.createHot(name);
     var module = {id: name, exports: {}, hot: hot};
     cache[name] = module;
     definition(module.exports, localRequire(name), module);
@@ -85,7 +84,7 @@
   };
 
   require.register = require.define = function(bundle, fn) {
-    if (typeof bundle === 'object') {
+    if (bundle && typeof bundle === 'object') {
       for (var key in bundle) {
         if (has.call(bundle, key)) {
           require.register(key, bundle[key]);
@@ -117,7 +116,6 @@
 
 (function() {
 var global = typeof window === 'undefined' ? this : window;
-var process;
 var __makeRelativeRequire = function(require, mappings, pref) {
   var none = {};
   var tryReq = function(name, pref) {
@@ -158,7 +156,7 @@ require.register("components/App.jsx", function(exports, require, module) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
+    value: true
 });
 
 var _react = require('react');
@@ -188,174 +186,185 @@ var _Programs2 = _interopRequireDefault(_Programs);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = _react2.default.createClass({
-  displayName: 'App',
+    displayName: 'App',
 
-  getInitialState: function getInitialState() {
-    return {
-      channels: [],
-      programs: [],
-      schedule: [],
-      player: {
-        cmd: "pause", // "play", "pause"
-        program: {},
-        src: "http://sverigesradio.se/topsy/direkt/132.mp3"
-      },
-      ui: {
-        selectedchannelid: null,
-        selectedchannelimage: null,
-        display: "guide"
-      }
-    };
-  },
-
-  _cache: {
-    channels: [],
-    programs: [],
-    schedule: [],
-    player: {
-      cmd: "pause", // "play", "pause"
-      program: {},
-      src: "http://sverigesradio.se/topsy/direkt/132.mp3"
+    getInitialState: function getInitialState() {
+        return {
+            channels: [],
+            programs: [],
+            schedule: [],
+            player: {
+                cmd: "pause", // "play", "pause"
+                program: {},
+                src: "http://sverigesradio.se/topsy/direkt/132.mp3"
+            },
+            ui: {
+                selectedchannelid: null,
+                selectedchannelimage: null,
+                display: "guide"
+            }
+        };
     },
-    ui: {
-      selectedchannelid: null,
-      selectedchannelimage: null,
-      display: "guide"
+
+    _cache: {
+        channels: [],
+        programs: [],
+        schedule: [],
+        player: {
+            cmd: "pause", // "play", "pause"
+            program: {},
+            src: "http://sverigesradio.se/topsy/direkt/132.mp3"
+        },
+        ui: {
+            selectedchannelid: null,
+            selectedchannelimage: null,
+            display: "guide"
+        }
+    },
+
+    // API functions
+    get: function get(url, prop) {
+        return new Promise(function (resolve, reject) {
+            var fetcher = (0, _Fetcher2.default)(url).then(function (val) {
+                var r = val[prop];
+                resolve(r);
+            }).catch(function (err) {
+                reject(err);
+            });
+        });
+    },
+    getChannels: function getChannels() {
+        var usefilter = true;
+        var filter = usefilter ? "&filter=channel.channeltype&filtervalue=Rikskanal" : "";
+        var url = "http://api.sr.se/api/v2/channels?pagination=false&format=json" + filter;
+        var _self = this;
+        this.get(url, "channels").then(function (val) {
+            _self.updateState({ channels: val });
+        });
+    },
+
+    getProgramsForChannel: function getProgramsForChannel(channel) {
+        var _this = this;
+
+        // ToDo internal cache check
+        if (this._cache.ui.selectedchannelid === channel.id) {
+            return;
+        }
+        var _self = this;
+        var urls = [{ u: "http://api.sr.se/api/v2/programs/index?channelid=" + channel.id + "&format=json&pagination=false", v: "programs" }, { u: channel.scheduleurl + "&format=json&pagination=false", v: "schedule" }];
+
+        var _loop = function _loop() {
+            var act = urls[i];
+            _this.get(act.u, act.v).then(function (val) {
+                var obj = {};
+                obj[act.v] = val;
+                var ui = _self._cache.ui;
+                ui.selectedchannelid = channel.id;
+                ui.selectedchannelimage = channel.image;
+                ui.display = "guide"; // always reset
+                _self.updateState(_self.mergeObjects({}, obj, { ui: ui }));
+            });
+        };
+
+        for (var i = 0; i < urls.length; i++) {
+            _loop();
+        }
+    },
+    // ie Object.assign function
+    mergeObjects: function mergeObjects() {
+        var resObj = {};
+        for (var i = 0; i < arguments.length; i += 1) {
+            var obj = arguments[i],
+                keys = Object.keys(obj);
+            for (var j = 0; j < keys.length; j += 1) {
+                resObj[keys[j]] = obj[keys[j]];
+            }
+        }
+        return resObj;
+    },
+    // State updater
+    updateState: function updateState(obj) {
+
+        this._cache = this.mergeObjects(this._cache, obj);
+        this.setState(obj);
+        // console.log(this._cache);
+    },
+    // Update player
+    updatePlayer: function updatePlayer(obj) {
+        var player = this._cache.player;
+        var c = this._cache;
+        // Deal with pausing
+        if (obj.cmd == "pause") {
+            player.cmd = "pause";
+            this.updateState({ player: player });
+            return;
+        }
+
+        // find channel live src from cache
+        var url = c.channels.filter(function (channel) {
+            return c.ui.selectedchannelid == channel.id;
+        })[0].liveaudio.url;
+
+        var update = false;
+        // play or pause
+        if (obj.cmd != player.cmd) {
+            player.cmd = obj.cmd;
+            update = true;
+        }
+        if (url != player.src) {
+            player.src = url;
+            update = true;
+        }
+
+        if (update) {
+            player.program = obj.player;
+            //console.log(player, '<<<<<<<<<')
+            this.updateState({ player: player });
+        }
+    },
+    componentWillMount: function componentWillMount() {
+        this.getChannels();
+    },
+
+    render: function render() {
+        var s = this._cache;
+        var navcontent = s.channels.length > 0 ? _react2.default.createElement(_Nav2.default, { channels: s.channels, updateState: this.getProgramsForChannel }) : '';
+        var bodycontent = s.programs.length > 0 && s.ui.selectedchannelid ? _react2.default.createElement(_Programs2.default, { programs: s.programs, schedule: s.schedule, ui: s.ui, update: this.updateState, updateplayer: this.updatePlayer }) : "";
+
+        return _react2.default.createElement(
+            'div',
+            { id: 'content' },
+            _react2.default.createElement(
+                'h4',
+                null,
+                _react2.default.createElement(
+                    'i',
+                    null,
+                    'Schwedische'
+                )
+            ),
+            _react2.default.createElement(
+                'h1',
+                null,
+                'Rundfunk.'
+            ),
+            _react2.default.createElement(
+                'nav',
+                null,
+                navcontent
+            ),
+            _react2.default.createElement(
+                'div',
+                { className: 'audio-player' },
+                _react2.default.createElement(_Player2.default, { player: s.player, ui: s.ui, updateplayer: this.updatePlayer })
+            ),
+            _react2.default.createElement(
+                'section',
+                { className: 'content-body' },
+                bodycontent
+            )
+        );
     }
-  },
-
-  // API functions
-  get: function get(url, prop) {
-    return new Promise(function (resolve, reject) {
-      var fetcher = (0, _Fetcher2.default)(url).then(function (val) {
-        var r = val[prop];
-        resolve(r);
-      }).catch(function (err) {
-        reject(err);
-      });
-    });
-  },
-  getChannels: function getChannels() {
-    var usefilter = true;
-    var filter = usefilter ? "&filter=channel.channeltype&filtervalue=Rikskanal" : "";
-    var url = "http://api.sr.se/api/v2/channels?pagination=false&format=json" + filter;
-    var _self = this;
-    this.get(url, "channels").then(function (val) {
-      _self.updateState({ channels: val });
-    });
-  },
-
-  getProgramsForChannel: function getProgramsForChannel(channel) {
-    var _this = this;
-
-    // ToDo internal cache check
-    if (this._cache.ui.selectedchannelid === channel.id) {
-      return;
-    }
-    var _self = this;
-    var urls = [{ u: "http://api.sr.se/api/v2/programs/index?channelid=" + channel.id + "&format=json&pagination=false", v: "programs" }, { u: channel.scheduleurl + "&format=json&pagination=false", v: "schedule" }];
-
-    var _loop = function _loop() {
-      var act = urls[i];
-      _this.get(act.u, act.v).then(function (val) {
-        var obj = {};
-        obj[act.v] = val;
-        var ui = _self._cache.ui;
-        ui.selectedchannelid = channel.id;
-        ui.selectedchannelimage = channel.image;
-        ui.display = "guide"; // always reset
-        _self.updateState(Object.assign({}, obj, { ui: ui }));
-      });
-    };
-
-    for (var i = 0; i < urls.length; i++) {
-      _loop();
-    }
-  },
-
-  // State updater
-  updateState: function updateState(obj) {
-    this._cache = Object.assign(this._cache, obj);
-    this.setState(obj);
-    // console.log(this._cache);
-  },
-  // Update player
-  updatePlayer: function updatePlayer(obj) {
-    var player = this._cache.player;
-    var c = this._cache;
-    // Deal with pausing
-    if (obj.cmd == "pause") {
-      player.cmd = "pause";
-      this.updateState({ player: player });
-      return;
-    }
-
-    // find channel live src from cache
-    var url = c.channels.filter(function (channel) {
-      return c.ui.selectedchannelid == channel.id;
-    })[0].liveaudio.url;
-
-    var update = false;
-    // play or pause
-    if (obj.cmd != player.cmd) {
-      player.cmd = obj.cmd;
-      update = true;
-    }
-    if (url != player.src) {
-      player.src = url;
-      update = true;
-    }
-
-    if (update) {
-
-      player.program = obj.player;
-      console.log(player, '<<<<<<<<<');
-      this.updateState({ player: player });
-    }
-  },
-  componentWillMount: function componentWillMount() {
-    this.getChannels();
-  },
-
-  render: function render() {
-    var s = this._cache;
-    var navcontent = s.channels.length > 0 ? _react2.default.createElement(_Nav2.default, { channels: s.channels, updateState: this.getProgramsForChannel }) : '';
-    var bodycontent = s.programs.length > 0 && s.ui.selectedchannelid ? _react2.default.createElement(_Programs2.default, { programs: s.programs, schedule: s.schedule, ui: s.ui, update: this.updateState, updateplayer: this.updatePlayer }) : "";
-
-    return _react2.default.createElement(
-      'div',
-      { id: 'content' },
-      _react2.default.createElement(
-        'h4',
-        null,
-        _react2.default.createElement(
-          'i',
-          null,
-          'Schwedische'
-        )
-      ),
-      _react2.default.createElement(
-        'h1',
-        null,
-        'Rundfunk.'
-      ),
-      _react2.default.createElement(
-        'nav',
-        null,
-        navcontent
-      ),
-      _react2.default.createElement(
-        'div',
-        { className: 'audio-player' },
-        _react2.default.createElement(_Player2.default, { player: s.player, ui: s.ui, updateplayer: this.updatePlayer })
-      ),
-      _react2.default.createElement(
-        'section',
-        { className: 'content-body' },
-        bodycontent
-      )
-    );
-  }
 });
 
 });
@@ -392,24 +401,24 @@ require.register("components/Fetcher.jsx", function(exports, require, module) {
 "use strict";
 
 module.exports = function (url) {
-  return new Promise(function (resolve, reject) {
+     return new Promise(function (resolve, reject) {
 
-    var reqListener = function reqListener() {
-      var data = JSON.parse(this.responseText);
-      resolve(data);
-    };
+          var reqListener = function reqListener() {
+               var data = JSON.parse(this.responseText);
+               resolve(data);
+          };
 
-    var reqError = function reqError(err) {
-      reject('Fetch Error :-S', err);
-    };
+          var reqError = function reqError(err) {
+               reject('Fetch Error :-S', err);
+          };
 
-    var oReq = new XMLHttpRequest();
-    oReq.addEventListener("load", reqListener);
-    oReq.addEventListener("error", reqError);
-    oReq.open("GET", url, true);
-    oReq.overrideMimeType('application\/json; charset=utf-8');
-    oReq.send();
-  });
+          var oReq = new XMLHttpRequest();
+          oReq.addEventListener("load", reqListener);
+          oReq.addEventListener("error", reqError);
+          oReq.open("GET", url, true);
+          oReq.overrideMimeType('application\/json; charset=utf-8');
+          oReq.send();
+     });
 };
 
 });
@@ -418,7 +427,7 @@ require.register("components/Guide.jsx", function(exports, require, module) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
+    value: true
 });
 
 var _react = require("react");
@@ -428,94 +437,93 @@ var _react2 = _interopRequireDefault(_react);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = _react2.default.createClass({
-  displayName: "Guide",
+    displayName: "Guide",
 
-  getInitialState: function getInitialState() {
-    return {};
-  },
-  play: function play(obj) {
+    getInitialState: function getInitialState() {
+        return {};
+    },
+    play: function play(obj) {
+        this.props.updateplayer({ player: obj, cmd: "play" });
+    },
+    guide: function guide() {
+        var _self = this;
+        var parseaspdate = function parseaspdate(str) {
+            var d = /-?\d+/.exec(str)[0];
+            return new Date(parseInt(d, 10));
+        };
 
-    this.props.updateplayer({ player: obj, cmd: "play" });
-  },
-  guide: function guide() {
-    var _self = this;
-    var parseaspdate = function parseaspdate(str) {
-      var d = /-?\d+/.exec(str)[0];
-      return new Date(parseInt(d, 10));
-    };
+        var guide = (this.props.schedule || []).map(function (s, n) {
+            var start = parseaspdate(s.starttimeutc);
+            var end = parseaspdate(s.endtimeutc);
+            var starthour = (start.getHours() < 10 ? "0" : "") + start.getHours();
+            var startmin = (start.getMinutes() < 10 ? "0" : "") + start.getMinutes();
+            var now = new Date();
+            var show = start.getTime() >= now.getTime() || now.getTime() < end.getTime() ? "" : "hide";
+            var isplaying = start.getTime() <= now.getTime() && end.getTime() > now.getTime();
+            var playbtn = isplaying ? _react2.default.createElement(
+                "a",
+                { href: "#", className: "btn", onClick: function onClick() {
+                        _self.play(s);
+                    } },
+                " Spela upp "
+            ) : "";
+            var playing = isplaying ? _react2.default.createElement(
+                "span",
+                { className: "playing" },
+                "*** I s\xE4ndning *** "
+            ) : "";
+            var playimage = isplaying ? _react2.default.createElement("img", { src: s.imageurl, className: "playimage" }) : "";
+            // get more data through s.episodeid and api call
+            return _react2.default.createElement(
+                "li",
+                { className: show, key: n },
+                _react2.default.createElement(
+                    "div",
+                    { className: "schedule" },
+                    _react2.default.createElement(
+                        "div",
+                        null,
+                        playing
+                    ),
+                    _react2.default.createElement(
+                        "span",
+                        { className: "time" },
+                        starthour,
+                        ":",
+                        startmin
+                    ),
+                    " | ",
+                    _react2.default.createElement(
+                        "span",
+                        { className: "title" },
+                        s.title,
+                        " ",
+                        s.subtitle
+                    ),
+                    " ",
+                    _react2.default.createElement(
+                        "p",
+                        null,
+                        s.description
+                    ),
+                    playbtn
+                )
+            );
+        });
 
-    var guide = (this.props.schedule || []).map(function (s, n) {
-      var start = parseaspdate(s.starttimeutc);
-      var end = parseaspdate(s.endtimeutc);
-      var starthour = (start.getHours() < 10 ? "0" : "") + start.getHours();
-      var startmin = (start.getMinutes() < 10 ? "0" : "") + start.getMinutes();
-      var now = new Date();
-      var show = start.getTime() >= now.getTime() || now.getTime() < end.getTime() ? "" : "hide";
-      var isplaying = start.getTime() <= now.getTime() && end.getTime() > now.getTime();
-      var playbtn = isplaying ? _react2.default.createElement(
-        "a",
-        { href: "#", className: "btn", onClick: function onClick() {
-            return _self.play(s);
-          } },
-        " Spela upp "
-      ) : "";
-      var playing = isplaying ? _react2.default.createElement(
-        "span",
-        { className: "playing" },
-        "*** I s\xE4ndning *** "
-      ) : "";
-      var playimage = isplaying ? _react2.default.createElement("img", { src: s.imageurl, className: "playimage" }) : "";
-      // get more data through s.episodeid and api call
-      return _react2.default.createElement(
-        "li",
-        { className: show, key: n },
-        _react2.default.createElement(
-          "div",
-          { className: "schedule" },
-          _react2.default.createElement(
+        return guide;
+    },
+    render: function render() {
+        return _react2.default.createElement(
             "div",
-            null,
-            playing
-          ),
-          _react2.default.createElement(
-            "span",
-            { className: "time" },
-            starthour,
-            ":",
-            startmin
-          ),
-          " | ",
-          _react2.default.createElement(
-            "span",
-            { className: "title" },
-            s.title,
-            " ",
-            s.subtitle
-          ),
-          " ",
-          _react2.default.createElement(
-            "p",
-            null,
-            s.description
-          ),
-          playbtn
-        )
-      );
-    });
-
-    return guide;
-  },
-  render: function render() {
-    return _react2.default.createElement(
-      "div",
-      { className: "program-group" },
-      _react2.default.createElement(
-        "ul",
-        { className: "guide" },
-        this.guide()
-      )
-    );
-  }
+            { className: "program-group" },
+            _react2.default.createElement(
+                "ul",
+                { className: "guide" },
+                this.guide()
+            )
+        );
+    }
 });
 
 });
@@ -524,7 +532,7 @@ require.register("components/Nav.jsx", function(exports, require, module) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
-   value: true
+    value: true
 });
 
 var _react = require('react');
@@ -538,27 +546,27 @@ var _NavItem2 = _interopRequireDefault(_NavItem);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = _react2.default.createClass({
-   displayName: 'Nav',
+    displayName: 'Nav',
 
-   // return channels array ui fixed
-   getInitialState: function getInitialState() {
-      return {};
-   },
+    // return channels array ui fixed
+    getInitialState: function getInitialState() {
+        return {};
+    },
 
-   navItems: function navItems() {
-      var fn = this.props.updateState;
-      return (this.props.channels || []).map(function (c, n) {
-         return _react2.default.createElement(_NavItem2.default, { key: n, channel: c, updateState: fn });
-      });
-   },
+    navItems: function navItems() {
+        var fn = this.props.updateState;
+        return (this.props.channels || []).map(function (c, n) {
+            return _react2.default.createElement(_NavItem2.default, { key: n, channel: c, updateState: fn });
+        });
+    },
 
-   render: function render() {
-      return _react2.default.createElement(
-         'div',
-         null,
-         this.navItems()
-      );
-   }
+    render: function render() {
+        return _react2.default.createElement(
+            'div',
+            null,
+            this.navItems()
+        );
+    }
 });
 
 });
@@ -604,20 +612,20 @@ exports.default = _react2.default.createClass({
 });
 
 require.register("components/Player.jsx", function(exports, require, module) {
-"use strict";
+'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _react = require("react");
+var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = _react2.default.createClass({
-  displayName: "Player",
+  displayName: 'Player',
 
   getInitialState: function getInitialState() {
     return {
@@ -628,7 +636,9 @@ exports.default = _react2.default.createClass({
     var a = this.props.player;
     var b = prevProps.player;
     var ui = this.props.ui;
+
     var player = document.getElementById("player");
+    console.log('in player', player.src, player.paused, a);
     if (!a.cmd) {
       return false;
     }
@@ -672,58 +682,53 @@ exports.default = _react2.default.createClass({
     }
   },
   componentWillUnmount: function componentWillUnmount() {
-    this._player.stop();
+    this._player.pause();
   },
   interact: function interact(e) {
     this.props.updateplayer({ cmd: "pause" });
   },
   render: function render() {
-    var _this = this;
-
     var p = this.props.player;
     var src = p.src;
-
+    console.log(p);
     return _react2.default.createElement(
-      "div",
-      { className: "player-container" },
+      'div',
+      { className: 'player-container' },
       _react2.default.createElement(
-        "a",
-        { className: "player-pause", onClick: this.interact },
-        "\xA0"
+        'a',
+        { className: 'player-pause', onClick: this.interact },
+        '\xA0'
       ),
       " ",
       _react2.default.createElement(
-        "a",
-        { className: "player-pause", onClick: this.interact },
-        "\xA0"
+        'a',
+        { className: 'player-pause', onClick: this.interact },
+        '\xA0'
       ),
       " ",
       _react2.default.createElement(
-        "figure",
+        'figure',
         null,
-        _react2.default.createElement("img", { src: this.props.ui.selectedchannelimage, className: "player-image" })
+        _react2.default.createElement('img', { src: this.props.ui.selectedchannelimage, className: 'player-image' })
       ),
       _react2.default.createElement(
-        "div",
-        { className: "player-content" },
+        'div',
+        { className: 'player-content' },
         _react2.default.createElement(
-          "span",
-          { className: "player-title" },
+          'span',
+          { className: 'player-title' },
           p.program.title,
           " ",
           p.program.subtitle
         ),
-        _react2.default.createElement("audio", {
-          controls: "controls",
-          className: "player",
-          id: "player",
-          ref: function ref(el) {
-            return _this._player = el;
-          },
-          preload: "false"
+        _react2.default.createElement('audio', {
+          controls: 'controls',
+          className: 'player',
+          id: 'player',
+          preload: 'false'
         })
       ),
-      _react2.default.createElement("div", { className: "clear" })
+      _react2.default.createElement('div', { className: 'clear' })
     );
   }
 });
@@ -918,7 +923,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 
-require.alias("process/browser.js", "process");process = require('process');require.register("___globals___", function(exports, require, module) {
+require.register("___globals___", function(exports, require, module) {
   
 });})();require('___globals___');
 
