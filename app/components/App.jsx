@@ -1,5 +1,6 @@
 import React from 'react';
 import Fetcher from './Fetcher';
+import Api from './Api';
 import Channel from './Channel';
 import Nav from './Nav';
 import Player from './Player';
@@ -140,6 +141,12 @@ export default React.createClass({
           this.updateState({player: player});
       }
    },
+   tracker: function(){
+       var c = this._cache;
+       Api(c.ui.selectedchannelid, c.ui.selectedchannelimage, function(res){
+           console.log("Track klick: " + res);
+       });
+   },
    componentWillMount: function(){
       this.getChannels();
    },
@@ -152,16 +159,13 @@ export default React.createClass({
        <Programs programs={s.programs} schedule={s.schedule} ui={s.ui} update={this.updateState} updateplayer={this.updatePlayer}/> : ""
 
     return (
-      <div id="content">
-        <h4><i>Schwedische</i></h4>
-        <h1>Rundfunk.</h1>
+        <div>
         <nav>{navcontent}</nav>
         <div className="audio-player">
-           <Player player={s.player} ui={s.ui} updateplayer={this.updatePlayer}/>
+           <Player player={s.player} ui={s.ui} updateplayer={this.updatePlayer} tracker={this.tracker}/>
         </div>
         <section className="content-body">{bodycontent}</section>
-
-      </div>
+       </div>
     );
   }
 });

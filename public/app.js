@@ -150,6 +150,25 @@ var __makeRelativeRequire = function(require, mappings, pref) {
 require.register("components/Api.jsx", function(exports, require, module) {
 "use strict";
 
+module.exports = function (channelId, channelImage, func) {
+    var url = GLOBAL_TRACKER_URL;
+    console.log(url, '<<<<<<<<<<<<<<<<<<<<<<<');
+    var oReq = new XMLHttpRequest();
+    var params = "channelId=" + channelId + "&channelImage=" + channelImage;
+    oReq.open("POST", url, true);
+
+    //Send the proper header information along with the request
+    oReq.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+
+    oReq.onreadystatechange = function () {
+        //Call a function when the state changes.
+        if (http.readyState == 4 && http.status == 200) {
+            func(http.responseText);
+        }
+    };
+    oReq.send(params);
+};
+
 });
 
 require.register("components/App.jsx", function(exports, require, module) {
@@ -166,6 +185,10 @@ var _react2 = _interopRequireDefault(_react);
 var _Fetcher = require('./Fetcher');
 
 var _Fetcher2 = _interopRequireDefault(_Fetcher);
+
+var _Api = require('./Api');
+
+var _Api2 = _interopRequireDefault(_Api);
 
 var _Channel = require('./Channel');
 
@@ -322,6 +345,12 @@ exports.default = _react2.default.createClass({
             this.updateState({ player: player });
         }
     },
+    tracker: function tracker() {
+        var c = this._cache;
+        (0, _Api2.default)(c.ui.selectedchannelid, c.ui.selectedchannelimage, function (res) {
+            console.log("Track klick: " + res);
+        });
+    },
     componentWillMount: function componentWillMount() {
         this.getChannels();
     },
@@ -333,21 +362,7 @@ exports.default = _react2.default.createClass({
 
         return _react2.default.createElement(
             'div',
-            { id: 'content' },
-            _react2.default.createElement(
-                'h4',
-                null,
-                _react2.default.createElement(
-                    'i',
-                    null,
-                    'Schwedische'
-                )
-            ),
-            _react2.default.createElement(
-                'h1',
-                null,
-                'Rundfunk.'
-            ),
+            null,
             _react2.default.createElement(
                 'nav',
                 null,
@@ -356,7 +371,7 @@ exports.default = _react2.default.createClass({
             _react2.default.createElement(
                 'div',
                 { className: 'audio-player' },
-                _react2.default.createElement(_Player2.default, { player: s.player, ui: s.ui, updateplayer: this.updatePlayer })
+                _react2.default.createElement(_Player2.default, { player: s.player, ui: s.ui, updateplayer: this.updatePlayer, tracker: this.tracker })
             ),
             _react2.default.createElement(
                 'section',
@@ -462,8 +477,8 @@ exports.default = _react2.default.createClass({
             var isplaying = start.getTime() <= now.getTime() && end.getTime() > now.getTime();
             var playbtn = isplaying ? _react2.default.createElement(
                 "a",
-                { href: "#", className: "btn", onClick: function onClick() {
-                        _self.play(s);
+                { href: "#", className: "btn", onClick: function onClick(e) {
+                        e.preventDefault();_self.play(s);
                     } },
                 " Spela upp "
             ) : "";
@@ -612,125 +627,131 @@ exports.default = _react2.default.createClass({
 });
 
 require.register("components/Player.jsx", function(exports, require, module) {
-'use strict';
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
+    value: true
 });
 
-var _react = require('react');
+var _react = require("react");
 
 var _react2 = _interopRequireDefault(_react);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = _react2.default.createClass({
-  displayName: 'Player',
+    displayName: "Player",
 
-  getInitialState: function getInitialState() {
-    return {
-      player: false
-    };
-  },
-  shouldComponentUpdate: function shouldComponentUpdate(prevProps, prevState) {
-    var a = this.props.player;
-    var b = prevProps.player;
-    var ui = this.props.ui;
+    getInitialState: function getInitialState() {
+        return {
+            player: false
+        };
+    },
+    hasbeenplayed: false,
+    shouldComponentUpdate: function shouldComponentUpdate(prevProps, prevState) {
+        var a = this.props.player;
+        var b = prevProps.player;
+        var ui = this.props.ui;
 
-    var player = document.getElementById("player");
-    console.log('in player', player.src, player.paused, a);
-    if (!a.cmd) {
-      return false;
-    }
-    if (a.cmd != b.cmd || a.cmd == "pause" && !player.paused) {
-      return true;
-    }
-    if (a.src != player.src) {
-      return true;
-    }
-    return false;
-  },
-
-  componentDidUpdate: function componentDidUpdate(prevProps, prevState) {
-    var player = document.getElementById("player");
-    var p = this.props.player;
-    player.src = p.src;
-    player.load();
-
-    if (p.cmd == "play") {
-      player.load();
-      setTimeout(function () {
-        player.play();
-      }, 800);
-
-      var isplaying = setInterval(function () {
-        console.log('in setInterval');
-        if (!player.paused && !player.ended && 0 < player.currentTime) {
-          clearInterval(isplaying);
-        } else {
-          if (!player.src) {
-            player.src = p.src;
-            player.load();
-          }
-          player.load();
-          player.play();
+        var player = document.getElementById("player");
+        if (!this.hasbeenplayed && a.cmd == "play") {
+            this.hasbeenplayed = true;
+            return true;
         }
-      }, 1000);
+        console.log('in player', player.src, player.paused, a.cmd, a.src);
+        if (!a.cmd) {
+            return false;
+        }
+        if (a.cmd != b.cmd || a.cmd == "pause" && !player.paused) {
+            return true;
+        }
+        if (a.src != player.src && a.cmd == "play") {
+            return true;
+        }
+        return false;
+    },
+
+    componentDidUpdate: function componentDidUpdate(prevProps, prevState) {
+        var player = document.getElementById("player");
+        var p = this.props.player;
+        player.src = p.src;
+        player.load();
+
+        if (p.cmd == "play") {
+            player.load();
+            setTimeout(function () {
+                player.play();
+            }, 800);
+
+            var isplaying = setInterval(function () {
+                console.log('in setInterval');
+                if (!player.paused && !player.ended && 0 < player.currentTime) {
+                    clearInterval(isplaying);
+                } else {
+                    if (!player.src) {
+                        player.src = p.src;
+                        player.load();
+                    }
+                    player.load();
+                    player.play();
+                }
+            }, 1000);
+            this.props.tracker();
+        }
+        if (p.cmd == "pause") {
+            player.pause();
+        }
+    },
+    componentWillUnmount: function componentWillUnmount() {
+        this._player.pause();
+    },
+    interact: function interact(e) {
+        this.props.updateplayer({ cmd: "pause" });
+    },
+    render: function render() {
+        var p = this.props.player;
+        var src = p.src;
+        console.log(p);
+        return _react2.default.createElement(
+            "div",
+            { className: "player-container" },
+            _react2.default.createElement(
+                "a",
+                { className: "player-pause", onClick: this.interact },
+                "\xA0"
+            ),
+            " ",
+            _react2.default.createElement(
+                "a",
+                { className: "player-pause", onClick: this.interact },
+                "\xA0"
+            ),
+            " ",
+            _react2.default.createElement(
+                "figure",
+                null,
+                _react2.default.createElement("img", { src: this.props.ui.selectedchannelimage, className: "player-image" })
+            ),
+            _react2.default.createElement(
+                "div",
+                { className: "player-content" },
+                _react2.default.createElement(
+                    "span",
+                    { className: "player-title" },
+                    p.program.title,
+                    " ",
+                    p.program.subtitle
+                ),
+                _react2.default.createElement("audio", {
+                    controls: "controls",
+                    className: "player",
+                    id: "player",
+                    preload: "false"
+                })
+            ),
+            _react2.default.createElement("div", { className: "clear" })
+        );
     }
-    if (p.cmd == "pause") {
-      player.pause();
-    }
-  },
-  componentWillUnmount: function componentWillUnmount() {
-    this._player.pause();
-  },
-  interact: function interact(e) {
-    this.props.updateplayer({ cmd: "pause" });
-  },
-  render: function render() {
-    var p = this.props.player;
-    var src = p.src;
-    console.log(p);
-    return _react2.default.createElement(
-      'div',
-      { className: 'player-container' },
-      _react2.default.createElement(
-        'a',
-        { className: 'player-pause', onClick: this.interact },
-        '\xA0'
-      ),
-      " ",
-      _react2.default.createElement(
-        'a',
-        { className: 'player-pause', onClick: this.interact },
-        '\xA0'
-      ),
-      " ",
-      _react2.default.createElement(
-        'figure',
-        null,
-        _react2.default.createElement('img', { src: this.props.ui.selectedchannelimage, className: 'player-image' })
-      ),
-      _react2.default.createElement(
-        'div',
-        { className: 'player-content' },
-        _react2.default.createElement(
-          'span',
-          { className: 'player-title' },
-          p.program.title,
-          " ",
-          p.program.subtitle
-        ),
-        _react2.default.createElement('audio', {
-          controls: 'controls',
-          className: 'player',
-          id: 'player',
-          preload: 'false'
-        })
-      ),
-      _react2.default.createElement('div', { className: 'clear' })
-    );
-  }
 });
 
 });

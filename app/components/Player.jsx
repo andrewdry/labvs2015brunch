@@ -6,20 +6,25 @@ export default React.createClass({
       player: false
     }
   },
+  hasbeenplayed: false,
   shouldComponentUpdate: function(prevProps, prevState){
      let a = this.props.player;
      let b = prevProps.player;
      let ui = this.props.ui;
 
      let player = document.getElementById("player");
-     console.log('in player', player.src, player.paused, a)
+     if (!this.hasbeenplayed && a.cmd == "play"){
+         this.hasbeenplayed = true;
+         return true;
+     }
+     console.log('in player', player.src, player.paused, a.cmd, a.src)
      if(!a.cmd) {
         return false;
      }
      if (a.cmd != b.cmd || (a.cmd == "pause" && !player.paused)){
         return true;
      }
-     if (a.src != player.src) {
+     if (a.src != player.src && a.cmd == "play") {
         return true;
      }
      return false;
@@ -48,6 +53,7 @@ export default React.createClass({
             player.play();
         }
      }, 1000);
+     this.props.tracker();
     }
     if(p.cmd == "pause"){
         player.pause();
