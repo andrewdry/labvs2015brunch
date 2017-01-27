@@ -144,7 +144,7 @@ export default React.createClass({
    tracker: function(){
        var c = this._cache;
        Api(c.ui.selectedchannelid, c.ui.selectedchannelimage, function(res){
-           console.log("Track klick: " + res);
+           console.log("Track clicked channel: " + c.ui.selectedchannelid);
        });
    },
    componentWillMount: function(){

@@ -1,6 +1,5 @@
 module.exports = function (channelId, channelImage, func) {
     var url = GLOBAL_TRACKER_URL;
-    console.log(url, '<<<<<<<<<<<<<<<<<<<<<<<');
     var oReq = new XMLHttpRequest();
     var params = "channelId=" + channelId + "&channelImage=" + channelImage;
     oReq.open("POST", url, true);
@@ -9,8 +8,8 @@ module.exports = function (channelId, channelImage, func) {
     oReq.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 
     oReq.onreadystatechange = function () {//Call a function when the state changes.
-        if (http.readyState == 4 && http.status == 200) {
-            func(http.responseText);
+        if (oReq.readyState == 4 && oReq.status == 200) {
+            func(oReq.responseText);
         }
     }
     oReq.send(params);

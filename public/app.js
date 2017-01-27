@@ -152,7 +152,6 @@ require.register("components/Api.jsx", function(exports, require, module) {
 
 module.exports = function (channelId, channelImage, func) {
     var url = GLOBAL_TRACKER_URL;
-    console.log(url, '<<<<<<<<<<<<<<<<<<<<<<<');
     var oReq = new XMLHttpRequest();
     var params = "channelId=" + channelId + "&channelImage=" + channelImage;
     oReq.open("POST", url, true);
@@ -162,8 +161,8 @@ module.exports = function (channelId, channelImage, func) {
 
     oReq.onreadystatechange = function () {
         //Call a function when the state changes.
-        if (http.readyState == 4 && http.status == 200) {
-            func(http.responseText);
+        if (oReq.readyState == 4 && oReq.status == 200) {
+            func(oReq.responseText);
         }
     };
     oReq.send(params);
@@ -348,7 +347,7 @@ exports.default = _react2.default.createClass({
     tracker: function tracker() {
         var c = this._cache;
         (0, _Api2.default)(c.ui.selectedchannelid, c.ui.selectedchannelimage, function (res) {
-            console.log("Track klick: " + res);
+            console.log("Track clicked channel: " + c.ui.selectedchannelid);
         });
     },
     componentWillMount: function componentWillMount() {
@@ -656,16 +655,25 @@ exports.default = _react2.default.createClass({
         var player = document.getElementById("player");
         if (!this.hasbeenplayed && a.cmd == "play") {
             this.hasbeenplayed = true;
+            console.log(1);
             return true;
         }
+        if (player.paused && a.cmd == "play") {
+            return true;
+        }
+
         console.log('in player', player.src, player.paused, a.cmd, a.src);
+
         if (!a.cmd) {
+            console.log(2);
             return false;
         }
         if (a.cmd != b.cmd || a.cmd == "pause" && !player.paused) {
+            console.log(3);
             return true;
         }
         if (a.src != player.src && a.cmd == "play") {
+            console.log(4);
             return true;
         }
         return false;

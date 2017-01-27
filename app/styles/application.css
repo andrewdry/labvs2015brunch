@@ -8,10 +8,13 @@
   margin: 0 auto;
   font-family: Arial,Verdana;
 }
+div#app h4, div#app h1 {
+  display:none;
+}
+
 h4 {margin-bottom: 0em;}
 h1 {
   margin: 0em;
-  font-size: 100px;
   text-transform: uppercase;
 }
 h1.i {
@@ -20,15 +23,23 @@ h1.i {
 }
 
 a {
-  color: #3f894a;
+  color: #000000;
   text-decoration: none;
 }
 
 a:hover {
-  color: #27552e;
+  color: #808080;
 }
 nav div.navitem {width:25%; float:left; padding:5px;}
 
+div.stats-item {
+    background:#000;
+    width:100%;
+    color:#fff;
+    font-size:2em;
+    text-align:center;
+    padding:15px;
+}
 
 div.toggler {margin:10px 5px 20px 5px; height:50px; }
 div.toggler img {width:50px; float:left;margin-right:10px;}
@@ -49,7 +60,14 @@ div.toggler a {color:#bbb;
 #player {display:none;}
 figure {padding:0px; margin:0px;float:left; margin-right: 10px;}
 .audio-player {clear:both;margin:0 5px;}
-div.player-content {background: #000; color:#fff;height:50px;padding:5px;font-size: 2em;}
+div.player-content {background: #000; color:#fff;height:50px;padding:5px;font-size: 2em;clip:auto;}
+span.player-title {
+    white-space: nowrap;
+    overflow: hidden;
+    margin-right: 70px;
+    display: block;
+    text-overflow: ellipsis;
+}
 .player-pause{color:red;float:right;width: 10px; height:30px; background: #fff;margin:10px 10px 10px 0;}
 img.player-image {width:50px;}
 
@@ -70,3 +88,6 @@ div.program-bundle .program-key {float:left; font-size:2em;}
 div.program div.content-item {padding-left:10%;}
 div.program div.content-item span.title {font-weight: bold; font-size: 1.5em;}
 div img.small {width: 20%; float:left;margin: 0 10px 10px 0;};
+
+
+/*# sourceMappingURL=app.css.map*/

@@ -15,16 +15,25 @@ export default React.createClass({
      let player = document.getElementById("player");
      if (!this.hasbeenplayed && a.cmd == "play"){
          this.hasbeenplayed = true;
+         console.log(1);
          return true;
      }
-     console.log('in player', player.src, player.paused, a.cmd, a.src)
+     if(player.paused && a.cmd == "play"){
+         return true;
+     }
+
+     console.log('in player', player.src, player.paused, a.cmd, a.src);
+     
      if(!a.cmd) {
+         console.log(2);
         return false;
      }
      if (a.cmd != b.cmd || (a.cmd == "pause" && !player.paused)){
+         console.log(3);
         return true;
      }
      if (a.src != player.src && a.cmd == "play") {
+         console.log(4);
         return true;
      }
      return false;
