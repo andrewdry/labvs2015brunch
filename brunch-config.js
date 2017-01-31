@@ -8,6 +8,9 @@ module.exports = {
     },
     stylesheets: {joinTo: 'app.css'}
   },
+  conventions: {
+    ignore: (path) => /(^chai*)/ 
+  },
 
   plugins: {
     babel: {presets: ['es2015', 'react']}

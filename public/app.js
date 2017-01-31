@@ -1110,5 +1110,3 @@ require.alias("vm-browserify/index.js", "vm");process = require('process');requi
   
 });})();require('___globals___');
 
-
-//# sourceMappingURL=app.js.map
