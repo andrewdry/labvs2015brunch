@@ -20,7 +20,7 @@ export default React.createClass({
       let end = parseaspdate(s.endtimeutc);
       let starthour = (start.getHours() < 10 ? "0": "") + start.getHours();
       let startmin= (start.getMinutes() < 10 ? "0": "") + start.getMinutes();
-      let now = new Date();
+      let now = _self.props.now ? _self.props.now : new Date();
       let show = (start.getTime() >= now.getTime() || now.getTime() < end.getTime()) ? "" : "hide";
       let isplaying = (start.getTime() <= now.getTime() && end.getTime() > now.getTime())
       let playbtn = isplaying ? <a href="#" className="btn" onClick={function(e) {e.preventDefault(); _self.play(s)}}> Spela upp </a> : "";

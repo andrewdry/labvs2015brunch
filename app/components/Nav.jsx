@@ -2,7 +2,6 @@ import React from 'react';
 import NavItem from './NavItem';
 
 export default React.createClass({
-    // return channels array ui fixed
     getInitialState: function(){
      return {}
     },

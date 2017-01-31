@@ -52,7 +52,7 @@ export default React.createClass({
 
     render: function(){
        return (
-       <div className="program-group">{this.programs()}</div>
+       <div className="program-group program-list">{this.programs()}</div>
        )
     }
 });

@@ -3,7 +3,8 @@ import React from 'react';
 export default React.createClass({
   getInitialState: function() {
     return {
-      player: false
+      player:this.props.player,
+      ui:this.props.ui
     }
   },
   hasbeenplayed: false,
@@ -11,36 +12,34 @@ export default React.createClass({
      let a = this.props.player;
      let b = prevProps.player;
      let ui = this.props.ui;
-
-     let player = document.getElementById("player");
+     //console.log(a);
+     let player = this.refs._player; //document.getElementById("player");
      if (!this.hasbeenplayed && a.cmd == "play"){
          this.hasbeenplayed = true;
-         console.log(1);
+         //console.log(1);
          return true;
      }
      if(player.paused && a.cmd == "play"){
          return true;
      }
 
-     console.log('in player', player.src, player.paused, a.cmd, a.src);
-     
      if(!a.cmd) {
-         console.log(2);
+         //console.log(2);
         return false;
      }
      if (a.cmd != b.cmd || (a.cmd == "pause" && !player.paused)){
-         console.log(3);
+         //console.log(3);
         return true;
      }
      if (a.src != player.src && a.cmd == "play") {
-         console.log(4);
+         //console.log(4);
         return true;
      }
      return false;
   },
 
   componentDidUpdate: function(prevProps, prevState){
-    let player = document.getElementById("player");
+    let player = this.refs._player; //document.getElementById("player");
     let p = this.props.player;
     player.src = p.src;
     player.load();
@@ -50,7 +49,7 @@ export default React.createClass({
      setTimeout(function(){player.play()}, 800);
 
      var isplaying = setInterval(function(){
-        console.log('in setInterval')
+        //console.log('in setInterval')
         if(!player.paused && !player.ended && 0 < player.currentTime){
             clearInterval(isplaying);
         } else {
@@ -71,7 +70,7 @@ export default React.createClass({
 
   },
   componentWillUnmount: function() {
-      this._player.pause();
+      this.refs._player.pause();
   },
   interact: function (e) {
       this.props.updateplayer({cmd:"pause"});
@@ -79,13 +78,13 @@ export default React.createClass({
   render: function() {
     let p = this.props.player;
     let src = p.src;
-    console.log(p);
+    let image = this.props.ui.selectedchannelimage;
     return (
     <div className="player-container">
     <a className="player-pause" onClick={this.interact}>&nbsp;</a>{" "}
     <a className="player-pause" onClick={this.interact}>&nbsp;</a>{" "}
     <figure>
-      <img src={this.props.ui.selectedchannelimage} className="player-image" />
+      <img src={image} className="player-image" />
     </figure>
     <div className="player-content">
     <span className="player-title">
@@ -97,6 +96,7 @@ export default React.createClass({
         className="player"
         id="player"
         preload="false"
+        ref="_player"
       />
       </div>
       <div className="clear"></div>

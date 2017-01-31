@@ -1,6 +1,5 @@
 import React from 'react';
 
-
 export default React.createClass({
     navigate: function(e){
       e.preventDefault();

@@ -1,10 +1,10 @@
 import React from 'react';
 import Fetcher from './Fetcher';
-import Api from './Api';
+import Tracker from './Tracker';
 import Channel from './Channel';
 import Nav from './Nav';
 import Player from './Player';
-import Programs from './Programs';
+var Promise = require('bluebird');
 
 
 export default React.createClass({
@@ -89,6 +89,7 @@ export default React.createClass({
         });
      }
    },
+
     // ie Object.assign function
    mergeObjects:  function() {
        var resObj = {};
@@ -101,12 +102,11 @@ export default React.createClass({
        }
        return resObj;
    },
+
    // State updater
    updateState: function(obj){
-     
      this._cache = this.mergeObjects(this._cache, obj);
      this.setState(obj);
-     // console.log(this._cache);
    },
    // Update player
    updatePlayer: function(obj){
@@ -119,7 +119,7 @@ export default React.createClass({
         return;
       }
 
-      // find channel live src from cache
+      // find channel live src from _cache
       let url = c.channels.filter(function(channel){
           return c.ui.selectedchannelid == channel.id
       })[0].liveaudio.url;
@@ -137,15 +137,13 @@ export default React.createClass({
 
       if(update){
           player.program = obj.player;
-          //console.log(player, '<<<<<<<<<')
           this.updateState({player: player});
       }
    },
+   postTrackToApi: Tracker,
    tracker: function(){
        var c = this._cache;
-       Api(c.ui.selectedchannelid, c.ui.selectedchannelimage, function(res){
-           console.log("Track clicked channel: " + c.ui.selectedchannelid);
-       });
+       this.postTrackToApi(c.ui.selectedchannelid, c.ui.selectedchannelimage, function(res){console.log('tracking')});
    },
    componentWillMount: function(){
       this.getChannels();
@@ -154,9 +152,9 @@ export default React.createClass({
    render: function() {
     let s = this._cache;
     let navcontent = s.channels.length > 0 ?
-       <Nav channels={s.channels} updateState={this.getProgramsForChannel} /> : ''
+       <Nav channels={s.channels} updateState={this.getProgramsForChannel} className="nav" /> : ''
     let bodycontent = s.programs.length > 0 && s.ui.selectedchannelid?
-       <Programs programs={s.programs} schedule={s.schedule} ui={s.ui} update={this.updateState} updateplayer={this.updatePlayer}/> : ""
+       <Channel programs={s.programs} schedule={s.schedule} ui={s.ui} update={this.updateState} updateplayer={this.updatePlayer}/> : ""
 
     return (
         <div>
