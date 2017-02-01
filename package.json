@@ -15,8 +15,7 @@
   },
   "dependencies": {
     "react": "^15.3.0",
-    "react-dom": "^15.3.0",
-    "bluebird": "^3.4.4"
+    "react-dom": "^15.3.0"
   },
   "devDependencies": {
     "auto-reload-brunch": "^2.0.0",
@@ -28,15 +27,11 @@
     "babel-register": "^6.4.3",
     "brunch": "^2.4.0",
     "chai": "^3.5.0",
-    "chai-as-promised": "^6.0.0",
-    "chai-like": "^0.1.10",
     "clean-css-brunch": "^2.0.0",
     "css-brunch": "^2.0.0",
     "javascript-brunch": "^2.0.0",
     "jsdom": "^9.9.1",
     "mocha": "^3.2.0",
-    "react-addons-test-utils": "^15.3.0",
-    "sinon": "^1.17.6",
-    "sinon-chai": "^2.8.0"
+    "react-addons-test-utils": "^15.3.0"
   }
 }

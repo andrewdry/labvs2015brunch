@@ -1,13 +1,12 @@
 import React from 'react';
-import ReactTestUtils from 'react-addons-test-utils';
+import {renderIntoDocument,findRenderedDOMComponentWithTag,Simulate,scryRenderedDOMComponentsWithTag} from 'react-addons-test-utils';
 import App from '../app/components/App';
-import sinon from 'sinon';
 import {expect} from 'chai';
 
 describe('<App />', function(){
   var component, trackerfunc, trackercalled, fetchfunc, fetchcalled = undefined;
   beforeEach(function(){
-    component = ReactTestUtils.renderIntoDocument(<App />);
+    component = renderIntoDocument(<App />);
 
   });
   it('should not have a default selected channel', function(){

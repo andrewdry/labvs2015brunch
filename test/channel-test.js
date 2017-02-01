@@ -1,10 +1,9 @@
 import React from 'react';
-import ReactTestUtils from 'react-addons-test-utils';
+import {renderIntoDocument,findRenderedDOMComponentWithClass,findRenderedDOMComponentWithTag,Simulate,scryRenderedDOMComponentsWithTag} from 'react-addons-test-utils';
 import Channel from '../app/components/Channel';
 import Guide from '../app/components/Guide';
 import dataprograms from './data/programs-data';
 import dataschedule from './data/schedule-data';
-import sinon from 'sinon';
 import {expect} from 'chai';
 
 describe('<Channel />', function(){
@@ -21,36 +20,36 @@ describe('<Channel />', function(){
     updatestatecalled = false;
     updatestatefunc = function(obj){ updatestatecalled = obj }
     updateplayerfunc = function(obj){ updateplayercalled = obj }
-    component = ReactTestUtils.renderIntoDocument(
+    component = renderIntoDocument(
       <Channel programs={s.programs} schedule={s.schedule} ui={s.ui} update={updatestatefunc} updateplayer={updateplayerfunc}/>
       );
 
   });
 
   it('should toggle between <Program /> and <Guide /> and update state', function(){
-    let links = ReactTestUtils.scryRenderedDOMComponentsWithTag(component,'a');
+    let links = scryRenderedDOMComponentsWithTag(component,'a');
     expect(links.length).to.equal(2);
     let guidelink = links[0];
     let programlink = links[1];
-    ReactTestUtils.Simulate.click(programlink);
+    Simulate.click(programlink);
     expect(updatestatecalled.ui.display).to.equal('program');
-    ReactTestUtils.Simulate.click(guidelink);
+    Simulate.click(guidelink);
     expect(updatestatecalled.ui.display).to.equal('guide');
   });
   it('should by default render <Guide />', function(){
-    let guide  = ReactTestUtils.findRenderedDOMComponentWithTag(component,'ul').className;
+    let guide  = findRenderedDOMComponentWithTag(component,'ul').className;
     expect(guide).to.equal('guide');
   });
 
   describe('<Guide />', function(){
     it('shoule update player state when play btn pressed', function(){
-      let guidecomponent = ReactTestUtils.renderIntoDocument(
+      let guidecomponent = renderIntoDocument(
         <Guide schedule={s.schedule} updateplayer={updateplayerfunc} now={testnow}/>
       );
-      let links = ReactTestUtils.scryRenderedDOMComponentsWithTag(guidecomponent,'a');
+      let links = scryRenderedDOMComponentsWithTag(guidecomponent,'a');
       let playbtn = links[0];
       expect(playbtn.className).to.contain('btn');
-      ReactTestUtils.Simulate.click(playbtn);
+      Simulate.click(playbtn);
       expect(updateplayercalled.cmd).to.equal('play');
       expect(updateplayercalled.player.channel).to.be.ok;
       expect(updateplayercalled.player.title).to.be.ok;
@@ -63,10 +62,10 @@ describe('<Channel />', function(){
       let ui = s.ui;
       // set program as selected views
       ui.display = "program";
-      let programcomponent =  ReactTestUtils.renderIntoDocument(
+      let programcomponent =  renderIntoDocument(
         <Channel programs={s.programs} schedule={s.schedule} ui={ui} update={updatestatefunc} updateplayer={updateplayerfunc}/>
       );
-      let program = ReactTestUtils.findRenderedDOMComponentWithClass(programcomponent,'program-list');
+      let program = findRenderedDOMComponentWithClass(programcomponent,'program-list');
       expect(program).to.be.ok;
     });
   });

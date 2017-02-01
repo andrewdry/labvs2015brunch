@@ -1,8 +1,7 @@
 import React from 'react';
-import ReactTestUtils from 'react-addons-test-utils';
+import {renderIntoDocument,findRenderedDOMComponentWithClass,findRenderedDOMComponentWithTag,Simulate,scryRenderedDOMComponentsWithTag} from 'react-addons-test-utils';
 import Nav from '../app/components/Nav';
 import Navitem from '../app/components/NavItem';
-import sinon from 'sinon';
 import {expect} from 'chai';
 
 describe('<Nav />', function(){
@@ -17,25 +16,25 @@ describe('<Nav />', function(){
   it('should render list of clickable channel images', function(){
     let channels = [];
     channels.push(channel);
-    component = ReactTestUtils.renderIntoDocument(<Nav channels={channels} updateState={navfunc} />);
-    let navitemImage  = ReactTestUtils.findRenderedDOMComponentWithTag(component,'img').src;
+    component = renderIntoDocument(<Nav channels={channels} updateState={navfunc} />);
+    let navitemImage  = findRenderedDOMComponentWithTag(component,'img').src;
     expect(navitemImage).to.equal('image-132');
 
-    let navitemLink = ReactTestUtils.findRenderedDOMComponentWithTag(component,'a');
-    ReactTestUtils.Simulate.click(navitemLink);
+    let navitemLink = findRenderedDOMComponentWithTag(component,'a');
+    Simulate.click(navitemLink);
     expect(navfunccalled).to.equal(channels[0]);
   });
 
   describe('<Navitem />', function(){
     it('should render a dom element with className navitem', function() {
-      component = ReactTestUtils.renderIntoDocument(<Navitem channel={channel} updateState={navitemfunc}/>);
-      let navitem  = ReactTestUtils.findRenderedDOMComponentWithClass(component,'navitem');
+      component = renderIntoDocument(<Navitem channel={channel} updateState={navitemfunc}/>);
+      let navitem  = findRenderedDOMComponentWithClass(component,'navitem');
       expect(navitem).to.be.ok
     });
     it('should call updateState with the channel properties set on component', function() {
-      component = ReactTestUtils.renderIntoDocument(<Navitem channel={channel} updateState={navitemfunc}/>);
-      const link = ReactTestUtils.findRenderedDOMComponentWithTag(component, 'a');
-      ReactTestUtils.Simulate.click(link);
+      component = renderIntoDocument(<Navitem channel={channel} updateState={navitemfunc}/>);
+      const link = findRenderedDOMComponentWithTag(component, 'a');
+      Simulate.click(link);
       expect(navitemfunccalled).to.equal(channel);
 
     });

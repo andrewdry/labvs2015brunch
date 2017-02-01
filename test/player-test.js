@@ -1,7 +1,6 @@
 import React from 'react';
-import ReactTestUtils from 'react-addons-test-utils';
+import {renderIntoDocument,findRenderedDOMComponentWithTag,Simulate,scryRenderedDOMComponentsWithTag} from 'react-addons-test-utils';
 import Player from '../app/components/Player';
-import sinon from 'sinon';
 import {expect} from 'chai';
 
 describe('<Player />', function(){
@@ -23,15 +22,15 @@ describe('<Player />', function(){
 
     })
   it('shold be paused by default', function(){
-    component = ReactTestUtils.renderIntoDocument(
+    component = renderIntoDocument(
       <Player player={s.player} ui={s.ui} updateplayer={updateplayerfunc} tracker={trackerfunc}/>
       );
-    let audio  = ReactTestUtils.findRenderedDOMComponentWithTag(component,'audio');
+    let audio  = findRenderedDOMComponentWithTag(component,'audio');
     expect(audio).to.be.ok;
     expect(audio.paused).to.equal(true);
   });
   it('should play audio if given play command', function(){
-    let playercomponent = ReactTestUtils.renderIntoDocument(
+    let playercomponent = renderIntoDocument(
       <Player player={s.player} ui={s.ui} updateplayer={updateplayerfunc} tracker={trackerfunc}/>
     );
     expect(playercomponent.props.player.cmd).to.equal('pause');
@@ -40,7 +39,7 @@ describe('<Player />', function(){
     expect(playercomponent.props.player.cmd).to.equal('play');
   });
   it('should fire tracker call if component did mount with play', function(){
-    let playercomponent = ReactTestUtils.renderIntoDocument(
+    let playercomponent = renderIntoDocument(
       <Player player={s.player} ui={s.ui} updateplayer={updateplayerfunc} tracker={trackerfunc}/>
     );
     let trackercalled = false;
@@ -53,12 +52,12 @@ describe('<Player />', function(){
   });
   it('should pause audio if pause links are pressed', function(){
     s.player.cmd = 'play';
-    let playercomponent = ReactTestUtils.renderIntoDocument(
+    let playercomponent = renderIntoDocument(
       <Player player={s.player} ui={s.ui} updateplayer={updateplayerfunc} tracker={trackerfunc}/>
     );
-    let pauselinks = ReactTestUtils.scryRenderedDOMComponentsWithTag(component,'a');
+    let pauselinks = scryRenderedDOMComponentsWithTag(component,'a');
     expect(pauselinks.length).to.equal(2);
-    ReactTestUtils.Simulate.click(pauselinks[0]);
+    Simulate.click(pauselinks[0]);
     expect(updateplayercalled).to.deep.equal({cmd:"pause"});
   });
 

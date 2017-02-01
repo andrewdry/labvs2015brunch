@@ -127,7 +127,6 @@ require.register("tls", function(exports, require, module) {
 require.register("child_process", function(exports, require, module) {
   module.exports = {};
 });
-var process;
 var __makeRelativeRequire = function(require, mappings, pref) {
   var none = {};
   var tryReq = function(name, pref) {
@@ -508,32 +507,32 @@ require.register("components/Fetcher.jsx", function(exports, require, module) {
 "use strict";
 
 module.exports = function (url) {
-  return new Promise(function (resolve, reject) {
+     return new Promise(function (resolve, reject) {
 
-    var reqListener = function () {
-      function reqListener() {
-        var data = JSON.parse(this.responseText);
-        resolve(data);
-      }
+          var reqListener = function () {
+               function reqListener() {
+                    var data = JSON.parse(this.responseText);
+                    resolve(data);
+               }
 
-      return reqListener;
-    }();
+               return reqListener;
+          }();
 
-    var reqError = function () {
-      function reqError(err) {
-        reject('Fetch Error :-S', err);
-      }
+          var reqError = function () {
+               function reqError(err) {
+                    reject('Fetch Error :-S', err);
+               }
 
-      return reqError;
-    }();
+               return reqError;
+          }();
 
-    var oReq = new XMLHttpRequest();
-    oReq.addEventListener("load", reqListener);
-    oReq.addEventListener("error", reqError);
-    oReq.open("GET", url, true);
-    oReq.overrideMimeType('application\/json; charset=utf-8');
-    oReq.send();
-  });
+          var oReq = new XMLHttpRequest();
+          oReq.addEventListener("load", reqListener);
+          oReq.addEventListener("error", reqError);
+          oReq.open("GET", url, true);
+          oReq.overrideMimeType('application\/json; charset=utf-8');
+          oReq.send();
+     });
 };
 
 });
@@ -542,7 +541,7 @@ require.register("components/Guide.jsx", function(exports, require, module) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
+    value: true
 });
 
 var _react = require("react");
@@ -552,117 +551,117 @@ var _react2 = _interopRequireDefault(_react);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 exports["default"] = _react2["default"].createClass({
-  displayName: "Guide",
+    displayName: "Guide",
 
-  getInitialState: function () {
-    function getInitialState() {
-      return {};
-    }
-
-    return getInitialState;
-  }(),
-  play: function () {
-    function play(obj) {
-      this.props.updateplayer({ player: obj, cmd: "play" });
-    }
-
-    return play;
-  }(),
-  guide: function () {
-    function guide() {
-      var _self = this;
-      var parseaspdate = function () {
-        function parseaspdate(str) {
-          var d = /-?\d+/.exec(str)[0];
-          return new Date(parseInt(d, 10));
+    getInitialState: function () {
+        function getInitialState() {
+            return {};
         }
 
-        return parseaspdate;
-      }();
+        return getInitialState;
+    }(),
+    play: function () {
+        function play(obj) {
+            this.props.updateplayer({ player: obj, cmd: "play" });
+        }
 
-      var guide = (this.props.schedule || []).map(function (s, n) {
-        var start = parseaspdate(s.starttimeutc);
-        var end = parseaspdate(s.endtimeutc);
-        var starthour = (start.getHours() < 10 ? "0" : "") + start.getHours();
-        var startmin = (start.getMinutes() < 10 ? "0" : "") + start.getMinutes();
-        var now = _self.props.now ? _self.props.now : new Date();
-        var show = start.getTime() >= now.getTime() || now.getTime() < end.getTime() ? "" : "hide";
-        var isplaying = start.getTime() <= now.getTime() && end.getTime() > now.getTime();
-        var playbtn = isplaying ? _react2["default"].createElement(
-          "a",
-          { href: "#", className: "btn", onClick: function () {
-              function onClick(e) {
-                e.preventDefault();_self.play(s);
-              }
+        return play;
+    }(),
+    guide: function () {
+        function guide() {
+            var _self = this;
+            var parseaspdate = function () {
+                function parseaspdate(str) {
+                    var d = /-?\d+/.exec(str)[0];
+                    return new Date(parseInt(d, 10));
+                }
 
-              return onClick;
-            }() },
-          " Spela upp "
-        ) : "";
-        var playing = isplaying ? _react2["default"].createElement(
-          "span",
-          { className: "playing" },
-          "*** I s\xE4ndning *** "
-        ) : "";
-        var playimage = isplaying ? _react2["default"].createElement("img", { src: s.imageurl, className: "playimage" }) : "";
-        // get more data through s.episodeid and api call
-        return _react2["default"].createElement(
-          "li",
-          { className: show, key: n },
-          _react2["default"].createElement(
-            "div",
-            { className: "schedule" },
-            _react2["default"].createElement(
-              "div",
-              null,
-              playing
-            ),
-            _react2["default"].createElement(
-              "span",
-              { className: "time" },
-              starthour,
-              ":",
-              startmin
-            ),
-            " | ",
-            _react2["default"].createElement(
-              "span",
-              { className: "title" },
-              s.title,
-              " ",
-              s.subtitle
-            ),
-            " ",
-            _react2["default"].createElement(
-              "p",
-              null,
-              s.description
-            ),
-            playbtn
-          )
-        );
-      });
+                return parseaspdate;
+            }();
 
-      return guide;
-    }
+            var guide = (this.props.schedule || []).map(function (s, n) {
+                var start = parseaspdate(s.starttimeutc);
+                var end = parseaspdate(s.endtimeutc);
+                var starthour = (start.getHours() < 10 ? "0" : "") + start.getHours();
+                var startmin = (start.getMinutes() < 10 ? "0" : "") + start.getMinutes();
+                var now = _self.props.now ? _self.props.now : new Date();
+                var show = start.getTime() >= now.getTime() || now.getTime() < end.getTime() ? "" : "hide";
+                var isplaying = start.getTime() <= now.getTime() && end.getTime() > now.getTime();
+                var playbtn = isplaying ? _react2["default"].createElement(
+                    "a",
+                    { href: "#", className: "btn", onClick: function () {
+                            function onClick(e) {
+                                e.preventDefault();_self.play(s);
+                            }
 
-    return guide;
-  }(),
-  render: function () {
-    function render() {
-      return _react2["default"].createElement(
-        "div",
-        { className: "program-group" },
-        _react2["default"].createElement(
-          "ul",
-          { className: "guide" },
-          this.guide()
-        )
-      );
-    }
+                            return onClick;
+                        }() },
+                    " Spela upp "
+                ) : "";
+                var playing = isplaying ? _react2["default"].createElement(
+                    "span",
+                    { className: "playing" },
+                    "*** I s\xE4ndning *** "
+                ) : "";
+                var playimage = isplaying ? _react2["default"].createElement("img", { src: s.imageurl, className: "playimage" }) : "";
+                // get more data through s.episodeid and api call
+                return _react2["default"].createElement(
+                    "li",
+                    { className: show, key: n },
+                    _react2["default"].createElement(
+                        "div",
+                        { className: "schedule" },
+                        _react2["default"].createElement(
+                            "div",
+                            null,
+                            playing
+                        ),
+                        _react2["default"].createElement(
+                            "span",
+                            { className: "time" },
+                            starthour,
+                            ":",
+                            startmin
+                        ),
+                        " | ",
+                        _react2["default"].createElement(
+                            "span",
+                            { className: "title" },
+                            s.title,
+                            " ",
+                            s.subtitle
+                        ),
+                        " ",
+                        _react2["default"].createElement(
+                            "p",
+                            null,
+                            s.description
+                        ),
+                        playbtn
+                    )
+                );
+            });
 
-    return render;
-  }()
+            return guide;
+        }
+
+        return guide;
+    }(),
+    render: function () {
+        function render() {
+            return _react2["default"].createElement(
+                "div",
+                { className: "program-group" },
+                _react2["default"].createElement(
+                    "ul",
+                    { className: "guide" },
+                    this.guide()
+                )
+            );
+        }
+
+        return render;
+    }()
 });
 
 });
@@ -671,7 +670,7 @@ require.register("components/Nav.jsx", function(exports, require, module) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
-   value: true
+    value: true
 });
 
 var _react = require('react');
@@ -685,38 +684,38 @@ var _NavItem2 = _interopRequireDefault(_NavItem);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 exports['default'] = _react2['default'].createClass({
-   displayName: 'Nav',
+    displayName: 'Nav',
 
-   getInitialState: function () {
-      function getInitialState() {
-         return {};
-      }
+    getInitialState: function () {
+        function getInitialState() {
+            return {};
+        }
 
-      return getInitialState;
-   }(),
+        return getInitialState;
+    }(),
 
-   navItems: function () {
-      function navItems() {
-         var fn = this.props.updateState;
-         return (this.props.channels || []).map(function (c, n) {
-            return _react2['default'].createElement(_NavItem2['default'], { key: n, channel: c, updateState: fn });
-         });
-      }
+    navItems: function () {
+        function navItems() {
+            var fn = this.props.updateState;
+            return (this.props.channels || []).map(function (c, n) {
+                return _react2['default'].createElement(_NavItem2['default'], { key: n, channel: c, updateState: fn });
+            });
+        }
 
-      return navItems;
-   }(),
+        return navItems;
+    }(),
 
-   render: function () {
-      function render() {
-         return _react2['default'].createElement(
-            'div',
-            null,
-            this.navItems()
-         );
-      }
+    render: function () {
+        function render() {
+            return _react2['default'].createElement(
+                'div',
+                null,
+                this.navItems()
+            );
+        }
 
-      return render;
-   }()
+        return render;
+    }()
 });
 
 });
@@ -1091,22 +1090,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 
-require.alias("assert/assert.js", "assert");
-require.alias("buffer/index.js", "buffer");
-require.alias("crypto-browserify/index.js", "crypto");
-require.alias("events/events.js", "events");
-require.alias("stream-http/index.js", "http");
-require.alias("https-browserify/index.js", "https");
-require.alias("os-browserify/browser.js", "os");
-require.alias("path-browserify/index.js", "path");
-require.alias("process/browser.js", "process");
-require.alias("punycode/punycode.js", "punycode");
-require.alias("querystring-es3/index.js", "querystring");
-require.alias("stream-browserify/index.js", "stream");
-require.alias("string_decoder/index.js", "string_decoder");
-require.alias("util/util.js", "sys");
-require.alias("url/url.js", "url");
-require.alias("vm-browserify/index.js", "vm");process = require('process');require.register("___globals___", function(exports, require, module) {
+require.register("___globals___", function(exports, require, module) {
   
 });})();require('___globals___');
 
+
+//# sourceMappingURL=app.js.map
